@@ -12,8 +12,7 @@ Spongecrab - define CLIs, parse arguments, and evaluate variables in bash.
 Use \u{1b}[1m--generate\u{1b}[0m to generate boilerplate code for a script.
 ";
 
-const BOILERPLATE: &str = r#"
-# Create cli and parse arguments
+const BOILERPLATE: &str = r#"# Create cli and parse arguments
 spongecrab_args=$(
     CLI="foo -o bar -f baz"
     NAME="my_script"

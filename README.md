@@ -32,10 +32,8 @@ Options:
   -h, --help
           Print help (see a summary with '-h')
 ```
-
-Generated code:
-```bash
-# my_script.sh
+Generated code (using `--generate`):
+```bash # my_script.sh
 # Create cli and parse arguments
 spongecrab_args=$(
     CLI="foo -o bar -f baz"
@@ -44,4 +42,5 @@ spongecrab_args=$(
     spongecrab $CLI --name $NAME --about "$ABOUT" -- $@
 ) || { echo $spongecrab_args; exit 1 # Print help or errors and quit
 }; eval $spongecrab_args # Evaluate results
+
 ```
