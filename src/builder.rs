@@ -6,7 +6,6 @@ use crate::result::Result;
 #[command(about = "spongecrab argument parser")]
 #[command(author = "https://ariel.ninja")]
 #[command(long_about = crate::ABOUT)]
-#[command(after_help = crate::EXAMPLE)]
 pub struct CliBuilder {
     /// Positional argument
     #[arg()]
@@ -23,9 +22,9 @@ pub struct CliBuilder {
     /// About text
     #[arg(long)]
     pub about: Option<String>,
-    /// Show debug info
+    /// Generate script boilerplate
     #[arg(long)]
-    pub debug: bool,
+    pub generate: bool,
     /// Raw text to parse
     #[arg(raw = true)]
     pub input: Vec<String>,
