@@ -2,16 +2,12 @@ use crate::result::{Error, Result};
 use clap::{ArgMatches, Command};
 
 pub fn parse_args(cli: &mut Command, input: &[String]) -> Result<ArgMatches> {
-    cli.clone().try_get_matches_from(input).map_err(|error| {
-        match error.kind() {
-            clap::error::ErrorKind::DisplayHelp => {
-                Error::from(cli.render_help().to_string())
-            }
-            _other_kind => {
-                Error::from(error.to_string())
-            },
-        }
-    })
+    cli.clone()
+        .try_get_matches_from(input)
+        .map_err(|error| match error.kind() {
+            clap::error::ErrorKind::DisplayHelp => Error::from(cli.render_help().to_string()),
+            _other_kind => Error::from(error.to_string()),
+        })
 }
 
 pub fn output_values(arguments: &[String], matches: &ArgMatches) -> Result<()> {
@@ -31,4 +27,3 @@ pub fn output_flags(flags: &[String], matches: &ArgMatches) -> Result<()> {
     }
     Ok(())
 }
-

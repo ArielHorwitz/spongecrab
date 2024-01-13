@@ -1,5 +1,5 @@
-use clap::{Arg, ArgAction, Command, Parser};
 use crate::result::Result;
+use clap::{Arg, ArgAction, Command, Parser};
 
 #[derive(Debug, Parser)]
 #[command(name = "spongecrab")]
@@ -30,7 +30,6 @@ pub struct CliBuilder {
     pub input: Vec<String>,
 }
 
-
 impl CliBuilder {
     pub fn new(input: &[String]) -> Result<Self> {
         Ok(Self::parse_from(input))
@@ -46,7 +45,7 @@ impl CliBuilder {
             cli = cli.about(about);
         };
         for positional in self.positional.iter() {
-            let arg = Arg::new(positional);
+            let arg = Arg::new(positional).required(true);
             cli = cli.arg(arg);
         }
         for option in self.option.iter() {
@@ -60,4 +59,3 @@ impl CliBuilder {
         Ok(cli)
     }
 }
-

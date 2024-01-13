@@ -1,10 +1,10 @@
 mod builder;
-mod result;
 mod parser;
+mod result;
 
 pub use builder::CliBuilder;
+pub use parser::{output_flags, output_values, parse_args};
 pub use result::{Error, Result};
-pub use parser::{parse_args, output_values, output_flags};
 
 const ABOUT: &str = "
 Spongecrab - define CLIs, parse arguments, and evaluate variables in bash.
@@ -28,7 +28,7 @@ pub fn run() -> Result<()> {
     let builder = CliBuilder::new(&raw_args)?;
     if builder.generate {
         println!("{BOILERPLATE}");
-        return Ok(())
+        return Ok(());
     }
     // Build CLI
     let mut cli = builder.build()?;
@@ -40,4 +40,3 @@ pub fn run() -> Result<()> {
     output_flags(&builder.flag, &args)?;
     Ok(())
 }
-

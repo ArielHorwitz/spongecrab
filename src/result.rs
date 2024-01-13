@@ -16,4 +16,3 @@ impl From<String> for Error {
 
 /// Result type for spongecrab
 pub type Result<T> = std::result::Result<T, Error>;
-
