@@ -5,6 +5,7 @@ use clap::{Arg, ArgAction, Command, Parser};
 #[command(name = "spongecrab")]
 #[command(about = "spongecrab argument parser")]
 #[command(author = "https://ariel.ninja")]
+#[command(version)]
 #[command(long_about = crate::ABOUT)]
 pub struct CliBuilder {
     /// Positional argument
