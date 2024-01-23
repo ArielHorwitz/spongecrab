@@ -12,18 +12,17 @@ pub fn parse_args(cli: &mut Command, input: &[String]) -> Result<ArgMatches> {
 
 pub fn output_values(arguments: &[String], matches: &ArgMatches) -> Result<()> {
     for name in arguments.iter() {
-        if let Some(value) = matches.get_one::<String>(name) {
-            println!("{name}={value}");
-        }
+        let value_match = matches.get_one::<String>(name);
+        let value = if let Some(v) = value_match { v } else { "" };
+        println!("{name}={value}");
     }
     Ok(())
 }
 
 pub fn output_flags(flags: &[String], matches: &ArgMatches) -> Result<()> {
     for name in flags.iter() {
-        if matches.get_flag(name) {
-            println!("{name}=1");
-        }
+        let value = if matches.get_flag(name) { "1" } else { "" };
+        println!("{name}={value}");
     }
     Ok(())
 }
