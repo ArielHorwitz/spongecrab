@@ -108,7 +108,7 @@ impl CliBuilder {
             let value_match = matches.get_one::<String>(&name);
             let value = if let Some(v) = value_match { v } else { "" };
             let name = &name.replace('-', "_");
-            println!("{name}={value}");
+            println!("{}{name}={value}", self.prefix);
         }
     }
 
@@ -117,7 +117,7 @@ impl CliBuilder {
         for name in flags {
             let value = if matches.get_flag(&name) { "1" } else { "" };
             let name = &name.replace('-', "_");
-            println!("{name}={value}");
+            println!("{}{name}={value}", self.prefix);
         }
     }
 }
