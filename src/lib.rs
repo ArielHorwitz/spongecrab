@@ -4,9 +4,6 @@ const ABOUT: &str = "
 Spongecrab - A powerful argument parser for bash.
 
 Use \u{1b}[1m--generate\u{1b}[0m to generate boilerplate code for a script.
-
-Argument can be encoded using this format (where applicable):
-NAME;HELP_TEXT;DEFAULT_VALUE;SHORT_NAME
 ";
 
 const GENERATED_BOILERPLATE: &str = r#"
@@ -26,7 +23,9 @@ const ARG_DELIMITER: char = ';';
 
 pub fn run() -> anyhow::Result<()> {
     let raw_args = std::env::args().collect::<Vec<String>>();
-    CliBuilder::new(&raw_args).parse()
+    let output = CliBuilder::new(&raw_args).parse()?;
+    println!("{output}");
+    Ok(())
 }
 
 /// Arguments for building the CLI.
@@ -50,16 +49,16 @@ pub struct CliBuilder {
     #[arg(short = 'f', long)]
     pub flag: Vec<String>,
     /// Application name
-    #[arg(long, default_value_t = String::from("myscript"))]
+    #[arg(short = 'N', long, default_value_t = String::from("myscript"))]
     pub name: String,
     /// Application about text
-    #[arg(long)]
+    #[arg(short = 'A', long)]
     pub about: Option<String>,
     /// Prefix final variable names
-    #[arg(long, default_value_t = String::from(""))]
+    #[arg(short = 'X', long, default_value_t = String::from(""))]
     pub prefix: String,
     /// Generate script boilerplate
-    #[arg(long)]
+    #[arg(short = 'G', long)]
     pub generate: bool,
     /// Raw text to parse
     #[arg(raw = true)]
@@ -71,23 +70,28 @@ impl CliBuilder {
     ///
     /// # Errors
     /// Will error if fails to parse input strings.
-    pub fn new(input: &[String]) -> Self {
+    pub fn new<T>(input: &[T]) -> Self
+    where
+        T: std::convert::AsRef<std::ffi::OsStr>,
+    {
         Self::parse_from(input)
     }
 
-    pub fn parse(&self) -> anyhow::Result<()> {
+    /// Get a string for shell evaluation with all arguments parsed with their values.
+    ///
+    /// # Errors
+    /// Will error if argument parsing fails.
+    pub fn parse(&self) -> anyhow::Result<String> {
         if self.generate {
-            println!("{GENERATED_BOILERPLATE}");
-            return Ok(());
+            return Ok(GENERATED_BOILERPLATE.to_owned());
         }
         let args = self.build().try_get_matches_from(&self.input)?;
-        self.output_values(&args);
-        self.output_flags(&args);
-        Ok(())
+        let output = self.output_values(&args);
+        Ok(output)
     }
 
     #[must_use]
-    pub fn build(&self) -> Command {
+    fn build(&self) -> Command {
         let mut cli = Command::new(self.name.clone()).no_binary_name(true);
         if let Some(about) = self.about.clone() {
             cli = cli.about(about);
@@ -99,7 +103,8 @@ impl CliBuilder {
         cli
     }
 
-    fn output_values(&self, matches: &ArgMatches) {
+    fn output_values(&self, matches: &ArgMatches) -> String {
+        let mut output = Vec::new();
         let arguments = vec![&self.positional, &self.optional, &self.option]
             .into_iter()
             .flatten()
@@ -108,17 +113,15 @@ impl CliBuilder {
             let value_match = matches.get_one::<String>(&name);
             let value = if let Some(v) = value_match { v } else { "" };
             let name = &name.replace('-', "_");
-            println!("{}{name}={value}", self.prefix);
+            output.push(format!("{}{name}={value}", self.prefix));
         }
-    }
-
-    fn output_flags(&self, matches: &ArgMatches) {
         let flags = self.flag.iter().map(|data| get_arg_data(data).0);
         for name in flags {
             let value = if matches.get_flag(&name) { "1" } else { "" };
             let name = &name.replace('-', "_");
-            println!("{}{name}={value}", self.prefix);
+            output.push(format!("{}{name}={value}", self.prefix));
         }
+        output.join("\n")
     }
 }
 
@@ -160,8 +163,11 @@ fn get_arg_data(data: &str) -> (String, String, Option<String>, Option<char>) {
     let (name, data) = data.split_once(crate::ARG_DELIMITER).unwrap_or((data, ""));
     let (help, data) = data.split_once(crate::ARG_DELIMITER).unwrap_or((data, ""));
     let (default, short) = data.split_once(crate::ARG_DELIMITER).unwrap_or((data, ""));
-    let default = if default.is_empty() { None } else { Some(default.to_owned()) };
+    let default = if default.is_empty() {
+        None
+    } else {
+        Some(default.to_owned())
+    };
     let short = short.chars().next();
     (name.to_owned(), help.to_owned(), default, short)
 }
-
