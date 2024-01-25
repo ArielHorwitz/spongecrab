@@ -1,7 +1,7 @@
 [package]
 name = "spongecrab"
 description = "Bringing powerful argument parsing to bash scripts"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 repository = "https://github.com/ArielHorwitz/spongecrab"
 keywords = [
