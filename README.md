@@ -1,46 +1,35 @@
 ```
-Spongecrab - define CLIs, parse arguments, and evaluate variables in bash.
+spongecrab argument parser
 
-Use --generate to generate boilerplate code for a script.
-
-
-Usage: spongecrab [OPTIONS] [POSITIONAL]... [-- <INPUT>...]
+Usage: spongecrab [OPTIONS] [-- <INPUT>...]
 
 Arguments:
-  [POSITIONAL]...
-          Positional argument
-
-  [INPUT]...
-          Raw text to parse
+  [INPUT]...  Raw text to parse
 
 Options:
-  -o, --option <OPTION>
-          Optional argument
-
-  -f, --flag <FLAG>
-          Flag argument
-
-      --name <NAME>
-          Name
-
-      --about <ABOUT>
-          About text
-
-      --generate
-          Generate script boilerplate
-
-  -h, --help
-          Print help (see a summary with '-h')
+  -p, --positional <POSITIONAL>  Add a (required) positional argument
+  -o, --optional <OPTIONAL>      Add an optional positional argument
+  -O, --option <OPTION>          Add an optional argument
+  -f, --flag <FLAG>              Add a flag argument
+  -N, --name <NAME>              Application name [default: myscript]
+  -A, --about <ABOUT>            Application about text
+  -X, --prefix <PREFIX>          Prefix final variable names [default: ]
+  -G, --generate                 Generate script boilerplate
+  -h, --help                     Print help (see more with '--help')
+  -V, --version                  Print version
 ```
 Generated code (using `--generate`):
 ```bash # my_script.sh
-# Create cli and parse arguments
-spongecrab_args=$(
-    CLI="foo -o bar -f baz"
-    NAME="my_script"
-    ABOUT="$NAME reticulates splines."
-    spongecrab $CLI --name $NAME --about "$ABOUT" -- $@
-) || { echo $spongecrab_args; exit 1 # Print help or errors and quit
-}; eval $spongecrab_args # Evaluate results
+
+APP_NAME=$(basename "$0")
+ABOUT_APP="$APP_NAME reticulates splines."
+CLI=(
+    -p "source;File path of existing file"
+    -o "destination;Target path;."
+    -O "backup-path;Backup path for existing file;;b"
+    -f "verbose;Print more logs;;v"
+)
+CLI=$(spongecrab --name "$APP_NAME" --about "$ABOUT_APP" "${CLI[@]}" -- "$@") || exit 1
+eval "$CLI" || exit 1
 
 ```
