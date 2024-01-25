@@ -1,5 +1,8 @@
 ```
-spongecrab argument parser
+Spongecrab - A powerful argument parser for bash.
+
+Use --generate to generate boilerplate code for a script.
+
 
 Usage: spongecrab [OPTIONS] [-- <INPUT>...]
 
@@ -19,17 +22,18 @@ Options:
   -V, --version                  Print version
 ```
 Generated code (using `--generate`):
-```bash # my_script.sh
+```bash
 
 APP_NAME=$(basename "$0")
-ABOUT_APP="$APP_NAME reticulates splines."
+ABOUT_APP="$APP_NAME is a hello world program."
 CLI=(
-    -p "source;File path of existing file"
-    -o "destination;Target path;."
-    -O "backup-path;Backup path for existing file;;b"
-    -f "verbose;Print more logs;;v"
+    -p "name;Name to say hello to"
+    -o "greetings;Greetings to use;hello"
+    -O "notice;Add a notice after greeting;;n"
+    -f "polite;Be polite;;p"
 )
 CLI=$(spongecrab --name "$APP_NAME" --about "$ABOUT_APP" "${CLI[@]}" -- "$@") || exit 1
 eval "$CLI" || exit 1
 
 ```
+See [the example](example.sh).

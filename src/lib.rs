@@ -8,12 +8,12 @@ Use \u{1b}[1m--generate\u{1b}[0m to generate boilerplate code for a script.
 
 const GENERATED_BOILERPLATE: &str = r#"
 APP_NAME=$(basename "$0")
-ABOUT_APP="$APP_NAME reticulates splines."
+ABOUT_APP="$APP_NAME is a hello world program."
 CLI=(
-    -p "source;File path of existing file"
-    -o "destination;Target path;."
-    -O "backup-path;Backup path for existing file;;b"
-    -f "verbose;Print more logs;;v"
+    -p "name;Name to say hello to"
+    -o "greetings;Greetings to use;hello"
+    -O "notice;Add a notice after greeting;;n"
+    -f "polite;Be polite;;p"
 )
 CLI=$(spongecrab --name "$APP_NAME" --about "$ABOUT_APP" "${CLI[@]}" -- "$@") || exit 1
 eval "$CLI" || exit 1
@@ -31,7 +31,7 @@ pub fn run() -> anyhow::Result<()> {
 /// Arguments for building the CLI.
 #[derive(Debug, Parser)]
 #[command(name = "spongecrab")]
-#[command(about = "spongecrab argument parser")]
+#[command(about = ABOUT)]
 #[command(author = "https://ariel.ninja")]
 #[command(version)]
 #[command(long_about = crate::ABOUT)]
@@ -113,13 +113,13 @@ impl CliBuilder {
             let value_match = matches.get_one::<String>(&name);
             let value = if let Some(v) = value_match { v } else { "" };
             let name = &name.replace('-', "_");
-            output.push(format!("{}{name}={value}", self.prefix));
+            output.push(format!("{}{name}='{value}'", self.prefix));
         }
         let flags = self.flag.iter().map(|data| get_arg_data(data).0);
         for name in flags {
             let value = if matches.get_flag(&name) { "1" } else { "" };
             let name = &name.replace('-', "_");
-            output.push(format!("{}{name}={value}", self.prefix));
+            output.push(format!("{}{name}='{value}'", self.prefix));
         }
         output.join("\n")
     }
