@@ -1,8 +1,7 @@
 ```
-Spongecrab - A powerful argument parser for bash.
+Spongecrab - bringing powerful argument parsing to bash scripts
 
-Use --generate to generate boilerplate code for a script.
-
+See '--example' and '--generate' for reference.
 
 Usage: spongecrab [OPTIONS] [-- <INPUT>...]
 
@@ -16,24 +15,27 @@ Options:
   -f, --flag <FLAG>              Add a flag argument
   -N, --name <NAME>              Application name [default: myscript]
   -A, --about <ABOUT>            Application about text
-  -X, --prefix <PREFIX>          Prefix final variable names [default: ]
-  -G, --generate                 Generate script boilerplate
-  -h, --help                     Print help (see more with '--help')
+  -P, --prefix <PREFIX>          Prefix for parsed variable names
+  -E, --example                  Generate example script
+  -G, --generate                 Generate script boilerplate (see also '--example')
+  -h, --help                     Print help
   -V, --version                  Print version
 ```
 Generated code (using `--generate`):
 ```bash
 
+# Command line interface (based on `spongecrab --generate`)
 APP_NAME=$(basename "$0")
-ABOUT_APP="$APP_NAME is a hello world program."
+ABOUT="program description"
+# Argument syntax: "<arg_name>;<help_text>;<default_value>;<short_name>"
 CLI=(
-    -p "name;Name to say hello to"
-    -o "greetings;Greetings to use;hello"
-    -O "notice;Add a notice after greeting;;n"
-    -f "polite;Be polite;;p"
+    -p "arg1;positional argument"
+    -o "arg2;optional positional argument;default"
+    -O "option;optional argument;;o"
+    -f "flag;optional flag argument;;f"
 )
-CLI=$(spongecrab --name "$APP_NAME" --about "$ABOUT_APP" "${CLI[@]}" -- "$@") || exit 1
+CLI=$(spongecrab --name "$APP_NAME" --about "$ABOUT" "${CLI[@]}" -- "$@") || exit 1
 eval "$CLI" || exit 1
 
 ```
-See [the example](example.sh).
+See the [example script](src/example.sh).

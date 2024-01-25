@@ -1,24 +1,24 @@
 use clap::{Arg, ArgAction, ArgMatches, Command, Parser};
 
 const ABOUT: &str = "
-Spongecrab - A powerful argument parser for bash.
+Spongecrab - bringing powerful argument parsing to bash scripts
 
-Use \u{1b}[1m--generate\u{1b}[0m to generate boilerplate code for a script.
-";
-
+See \u{1b}[1m'--example'\u{1b}[0m and \u{1b}[1m'--generate'\u{1b}[0m for reference.";
 const GENERATED_BOILERPLATE: &str = r#"
+# Command line interface (based on `spongecrab --generate`)
 APP_NAME=$(basename "$0")
-ABOUT_APP="$APP_NAME is a hello world program."
+ABOUT="program description"
+# Argument syntax: "<arg_name>;<help_text>;<default_value>;<short_name>"
 CLI=(
-    -p "name;Name to say hello to"
-    -o "greetings;Greetings to use;hello"
-    -O "notice;Add a notice after greeting;;n"
-    -f "polite;Be polite;;p"
+    -p "arg1;positional argument"
+    -o "arg2;optional positional argument;default"
+    -O "option;optional argument;;o"
+    -f "flag;optional flag argument;;f"
 )
-CLI=$(spongecrab --name "$APP_NAME" --about "$ABOUT_APP" "${CLI[@]}" -- "$@") || exit 1
+CLI=$(spongecrab --name "$APP_NAME" --about "$ABOUT" "${CLI[@]}" -- "$@") || exit 1
 eval "$CLI" || exit 1
 "#;
-
+const EXAMPLE_SCRIPT: &str = include_str!("example.sh");
 const ARG_DELIMITER: char = ';';
 
 pub fn run() -> anyhow::Result<()> {
@@ -31,10 +31,9 @@ pub fn run() -> anyhow::Result<()> {
 /// Arguments for building the CLI.
 #[derive(Debug, Parser)]
 #[command(name = "spongecrab")]
+#[command(version)]
 #[command(about = ABOUT)]
 #[command(author = "https://ariel.ninja")]
-#[command(version)]
-#[command(long_about = crate::ABOUT)]
 pub struct CliBuilder {
     /// Add a (required) positional argument
     #[arg(short = 'p', long)]
@@ -54,10 +53,13 @@ pub struct CliBuilder {
     /// Application about text
     #[arg(short = 'A', long)]
     pub about: Option<String>,
-    /// Prefix final variable names
-    #[arg(short = 'X', long, default_value_t = String::from(""))]
-    pub prefix: String,
-    /// Generate script boilerplate
+    /// Prefix for parsed variable names
+    #[arg(short = 'P', long)]
+    pub prefix: Option<String>,
+    /// Generate example script
+    #[arg(short = 'E', long)]
+    pub example: bool,
+    /// Generate script boilerplate (see also '--example')
     #[arg(short = 'G', long)]
     pub generate: bool,
     /// Raw text to parse
@@ -77,11 +79,14 @@ impl CliBuilder {
         Self::parse_from(input)
     }
 
-    /// Get a string for shell evaluation with all arguments parsed with their values.
+    /// Produce a string for shell evaluation containing parsed arguments and values.
     ///
     /// # Errors
     /// Will error if argument parsing fails.
     pub fn parse(&self) -> anyhow::Result<String> {
+        if self.example {
+            return Ok(EXAMPLE_SCRIPT.to_owned());
+        }
         if self.generate {
             return Ok(GENERATED_BOILERPLATE.to_owned());
         }
@@ -104,6 +109,7 @@ impl CliBuilder {
     }
 
     fn output_values(&self, matches: &ArgMatches) -> String {
+        let prefix = self.prefix.to_owned().unwrap_or_else(|| "".to_owned());
         let mut output = Vec::new();
         let arguments = vec![&self.positional, &self.optional, &self.option]
             .into_iter()
@@ -112,14 +118,14 @@ impl CliBuilder {
         for name in arguments {
             let value_match = matches.get_one::<String>(&name);
             let value = if let Some(v) = value_match { v } else { "" };
-            let name = &name.replace('-', "_");
-            output.push(format!("{}{name}='{value}'", self.prefix));
+            let name = format!("{prefix}{name}").replace('-', "_");
+            output.push(format!("{name}='{value}'"));
         }
         let flags = self.flag.iter().map(|data| get_arg_data(data).0);
         for name in flags {
             let value = if matches.get_flag(&name) { "1" } else { "" };
-            let name = &name.replace('-', "_");
-            output.push(format!("{}{name}='{value}'", self.prefix));
+            let name = format!("{prefix}{name}").replace('-', "_");
+            output.push(format!("{name}='{value}'"));
         }
         output.join("\n")
     }

@@ -14,7 +14,7 @@ Generated code (using `--generate`):
 ```bash'
 target/release/spongecrab --generate
 echo '```'
-echo "See [the example](example.sh)."
+echo "See the [example script](src/example.sh)."
 exec &> /dev/tty
 
 mv $TEMPFILE .

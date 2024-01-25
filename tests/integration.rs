@@ -18,32 +18,54 @@ mod integration_tests {
             .parse()
             .expect("generate")
             .replace("spongecrab ", "cargo run -qr -- ");
-        let cli_name = "neo";
-        let cli_greetings = "greetings";
-        let cli_notice = "follow the white rabbit";
-        let cli_polite = "1";
-        let generated = format!(
-            "
-            set -e
-            {generated}
-            echo -n parsed.
-            echo -n name $name.
-            [[ $name = \"{cli_name}\" ]]
-            echo -n greetings $greetings.
-            [[ $greetings = \"{cli_greetings}\" ]]
-            echo -n notice $notice.
-            [[ $notice = \"{cli_notice}\" ]]
-            echo -n polite $polite.
-            [[ $polite = \"{cli_polite}\" ]]
-        "
-        );
-        std::fs::write("/tmp/gentest.sh", generated).expect("write");
+        let args = [
+            ("arg1", "neo"),
+            ("arg2", "greetings"),
+            ("option", "follow the white rabbit"),
+            ("flag", "1"),
+        ];
+        let checks = check_args_code(&args);
+        let args = [args[0].1, args[1].1, "-o", args[2].1, "-f"];
+        let script = format!("set -e\n{generated}\n{checks}");
+        std::fs::write("/tmp/test_generate.sh", script).expect("write");
         let output = std::process::Command::new("bash")
-            .arg("/tmp/gentest.sh")
-            .args([cli_name, cli_greetings, "-n", cli_notice, "-p"])
+            .arg("/tmp/test_generate.sh")
+            .args(args)
             .output()
             .expect("generated test script success");
         dbg!(&output);
         assert!(output.status.success());
+    }
+
+    #[test]
+    fn example() {
+        let generated = CliBuilder::new(&["app", "--example"])
+            .parse()
+            .expect("example")
+            .replace("spongecrab ", "cargo run -qr -- ");
+        let args = [
+            ("name", "neo"),
+            ("greetings", "greetings"),
+            ("notice", "follow the white rabbit"),
+            ("polite", "1"),
+        ];
+        let checks = check_args_code(&args);
+        let args = [args[0].1, args[1].1, "-n", args[2].1, "-p"];
+        let script = format!("set -e\n{generated}\n{checks}");
+        std::fs::write("/tmp/test_example.sh", script).expect("write");
+        let output = std::process::Command::new("bash")
+            .arg("/tmp/test_example.sh")
+            .args(args)
+            .output()
+            .expect("generated test script success");
+        dbg!(&output);
+        assert!(output.status.success());
+    }
+
+    fn check_args_code(args: &[(&str, &str)]) -> String {
+        args.iter()
+            .map(|(n, v)| format!("echo -n {n}:${n},\n[[ ${n} = \"{v}\" ]]"))
+            .collect::<Vec<String>>()
+            .join("\n")
     }
 }
