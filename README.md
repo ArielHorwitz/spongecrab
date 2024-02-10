@@ -9,15 +9,17 @@ Arguments:
   [INPUT]...  Raw text to parse
 
 Options:
+      --name <NAME>              Application name [default: myscript]
+      --about <ABOUT>            Application about text
   -p, --positional <POSITIONAL>  Add a (required) positional argument
   -o, --optional <OPTIONAL>      Add an optional positional argument
   -O, --option <OPTION>          Add an optional argument
   -f, --flag <FLAG>              Add a flag argument
-  -N, --name <NAME>              Application name [default: myscript]
-  -A, --about <ABOUT>            Application about text
+  -c, --collect <COLLECT>        Collect remaining positional arguments
+  -C, --collect+ <COLLECT>       Collect (required) remaining positional arguments
   -P, --prefix <PREFIX>          Prefix for parsed variable names
-  -E, --example                  Generate example script
   -G, --generate                 Generate script boilerplate (see also '--example')
+      --example                  Generate example script
   -h, --help                     Print help
   -V, --version                  Print version
 ```
@@ -28,11 +30,14 @@ Generated code (using `--generate`):
 APP_NAME=$(basename "$0")
 ABOUT="program description"
 # Argument syntax: "<arg_name>;<help_text>;<default_value>;<short_name>"
+# -o, -c, -C are mutually exclusive
 CLI=(
-    -p "arg1;positional argument"
-    -o "arg2;optional positional argument;default"
-    -O "option;optional argument;;o"
-    -f "flag;optional flag argument;;f"
+    -p "arg1;Positional argument"
+    -o "arg2;Optional positional argument;<default value>"
+    -O "option;Optional argument;;o"
+    -f "flag;Optional flag argument;;f"
+    -c "collect_any;Optional remaining positional arguments"
+    -C "collect_some;Required remaining positional arguments"
 )
 CLI=$(spongecrab --name "$APP_NAME" --about "$ABOUT" "${CLI[@]}" -- "$@") || exit 1
 eval "$CLI" || exit 1

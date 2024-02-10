@@ -9,11 +9,14 @@ const GENERATED_BOILERPLATE: &str = r#"
 APP_NAME=$(basename "$0")
 ABOUT="program description"
 # Argument syntax: "<arg_name>;<help_text>;<default_value>;<short_name>"
+# -o, -c, -C are mutually exclusive
 CLI=(
-    -p "arg1;positional argument"
-    -o "arg2;optional positional argument;default"
-    -O "option;optional argument;;o"
-    -f "flag;optional flag argument;;f"
+    -p "arg1;Positional argument"
+    -o "arg2;Optional positional argument;<default value>"
+    -O "option;Optional argument;;o"
+    -f "flag;Optional flag argument;;f"
+    -c "collect_any;Optional remaining positional arguments"
+    -C "collect_some;Required remaining positional arguments"
 )
 CLI=$(spongecrab --name "$APP_NAME" --about "$ABOUT" "${CLI[@]}" -- "$@") || exit 1
 eval "$CLI" || exit 1
@@ -35,11 +38,17 @@ pub fn run() -> anyhow::Result<()> {
 #[command(about = ABOUT)]
 #[command(author = "https://ariel.ninja")]
 pub struct CliBuilder {
+    /// Application name
+    #[arg(long, default_value_t = String::from("myscript"))]
+    pub name: String,
+    /// Application about text
+    #[arg(long)]
+    pub about: Option<String>,
     /// Add a (required) positional argument
     #[arg(short = 'p', long)]
     pub positional: Vec<String>,
     /// Add an optional positional argument
-    #[arg(short = 'o', long)]
+    #[arg(short = 'o', long, conflicts_with_all = ["collect", "collect+"])]
     pub optional: Vec<String>,
     /// Add an optional argument
     #[arg(short = 'O', long)]
@@ -47,21 +56,22 @@ pub struct CliBuilder {
     /// Add a flag argument
     #[arg(short = 'f', long)]
     pub flag: Vec<String>,
-    /// Application name
-    #[arg(short = 'N', long, default_value_t = String::from("myscript"))]
-    pub name: String,
-    /// Application about text
-    #[arg(short = 'A', long)]
-    pub about: Option<String>,
+    /// Collect remaining positional arguments
+    #[arg(short = 'c', long, conflicts_with_all = ["optional", "collect+"])]
+    pub collect: Option<String>,
+    /// Collect (required) remaining positional arguments
+    #[arg(short = 'C', long = "collect+")]
+    #[arg(value_name = "COLLECT", conflicts_with_all = ["optional", "collect"])]
+    pub collect_required: Option<String>,
     /// Prefix for parsed variable names
     #[arg(short = 'P', long)]
     pub prefix: Option<String>,
-    /// Generate example script
-    #[arg(short = 'E', long)]
-    pub example: bool,
     /// Generate script boilerplate (see also '--example')
     #[arg(short = 'G', long)]
     pub generate: bool,
+    /// Generate example script
+    #[arg(long)]
+    pub example: bool,
     /// Raw text to parse
     #[arg(raw = true)]
     pub input: Vec<String>,
@@ -105,6 +115,11 @@ impl CliBuilder {
         cli = with_arguments(cli, &self.optional, ArgumentType::Optional);
         cli = with_arguments(cli, &self.option, ArgumentType::Option);
         cli = with_arguments(cli, &self.flag, ArgumentType::Flag);
+        if let Some(collect_var) = &self.collect {
+            cli = cli.arg(get_arg(collect_var, ArgumentType::Collect));
+        } else if let Some(collect_var) = &self.collect_required {
+            cli = cli.arg(get_arg(collect_var, ArgumentType::CollectRequired));
+        };
         cli
     }
 
@@ -127,6 +142,16 @@ impl CliBuilder {
             let name = format!("{prefix}{name}").replace('-', "_");
             output.push(format!("{name}='{value}'"));
         }
+        if let Some(collect) = self.collect.as_ref().or(self.collect_required.as_ref()) {
+            let (name, _, _, _) = get_arg_data(collect);
+            let collected = matches.get_many(&name).map_or_else(String::new, |values| {
+                values
+                    .map(|v: &String| format!("'{v}'"))
+                    .collect::<Vec<String>>()
+                    .join(" ")
+            });
+            output.push(format!("{prefix}{name}=({collected})"));
+        }
         output.join("\n")
     }
 }
@@ -137,6 +162,8 @@ enum ArgumentType {
     Optional,
     Option,
     Flag,
+    Collect,
+    CollectRequired,
 }
 
 fn with_arguments(cli: Command, args: &[String], arg_type: ArgumentType) -> Command {
@@ -161,6 +188,8 @@ fn get_arg(data: &str, arg_type: ArgumentType) -> Arg {
         ArgumentType::Optional => arg,
         ArgumentType::Option => arg.long(name.to_owned()),
         ArgumentType::Flag => arg.long(name.to_owned()).action(ArgAction::SetTrue),
+        ArgumentType::Collect => arg.num_args(0..),
+        ArgumentType::CollectRequired => arg.num_args(1..).required(true),
     };
     arg
 }
