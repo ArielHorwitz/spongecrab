@@ -17,6 +17,7 @@ Options:
   -f, --flag <FLAG>              Add a flag argument
   -c, --collect <COLLECT>        Collect remaining positional arguments
   -C, --collect+ <COLLECT>       Collect (required) remaining positional arguments
+  -e, --extra <EXTRA>            Collect extra optional arguments after '--'
   -P, --prefix <PREFIX>          Prefix for parsed variable names
   -G, --generate                 Generate script boilerplate (see also '--example')
       --example                  Generate example script
@@ -38,6 +39,7 @@ CLI=(
     -f "flag;Optional flag argument;;f"
     -c "collect_any;Optional remaining positional arguments"
     -C "collect_some;Required remaining positional arguments"
+    -e "extra;Optional extra arguments after '--'"
 )
 CLI=$(spongecrab --name "$APP_NAME" --about "$ABOUT" "${CLI[@]}" -- "$@") || exit 1
 eval "$CLI" || exit 1

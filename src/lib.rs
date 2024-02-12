@@ -17,6 +17,7 @@ CLI=(
     -f "flag;Optional flag argument;;f"
     -c "collect_any;Optional remaining positional arguments"
     -C "collect_some;Required remaining positional arguments"
+    -e "extra;Optional extra arguments after '--'"
 )
 CLI=$(spongecrab --name "$APP_NAME" --about "$ABOUT" "${CLI[@]}" -- "$@") || exit 1
 eval "$CLI" || exit 1
@@ -63,6 +64,9 @@ pub struct CliBuilder {
     #[arg(short = 'C', long = "collect+")]
     #[arg(value_name = "COLLECT", conflicts_with_all = ["optional", "collect"])]
     pub collect_required: Option<String>,
+    /// Collect extra optional arguments after '--'
+    #[arg(short = 'e', long)]
+    pub extra: Option<String>,
     /// Prefix for parsed variable names
     #[arg(short = 'P', long)]
     pub prefix: Option<String>,
@@ -120,6 +124,9 @@ impl CliBuilder {
         } else if let Some(collect_var) = &self.collect_required {
             cli = cli.arg(get_arg(collect_var, ArgumentType::CollectRequired));
         };
+        if let Some(extra_args) = &self.extra {
+            cli = cli.arg(get_arg(extra_args, ArgumentType::Last));
+        };
         cli
     }
 
@@ -152,6 +159,16 @@ impl CliBuilder {
             });
             output.push(format!("{prefix}{name}=({collected})"));
         }
+        if let Some(extra) = self.extra.as_ref() {
+            let (name, _, _, _) = get_arg_data(extra);
+            let extras = matches.get_many(&name).map_or_else(String::new, |values| {
+                values
+                    .map(|v: &String| format!("'{v}'"))
+                    .collect::<Vec<String>>()
+                    .join(" ")
+            });
+            output.push(format!("{prefix}{name}=({extras})"));
+        }
         output.join("\n")
     }
 }
@@ -164,6 +181,7 @@ enum ArgumentType {
     Flag,
     Collect,
     CollectRequired,
+    Last,
 }
 
 fn with_arguments(cli: Command, args: &[String], arg_type: ArgumentType) -> Command {
@@ -190,6 +208,7 @@ fn get_arg(data: &str, arg_type: ArgumentType) -> Arg {
         ArgumentType::Flag => arg.long(name.to_owned()).action(ArgAction::SetTrue),
         ArgumentType::Collect => arg.num_args(0..),
         ArgumentType::CollectRequired => arg.num_args(1..).required(true),
+        ArgumentType::Last => arg.num_args(0..).last(true),
     };
     arg
 }
