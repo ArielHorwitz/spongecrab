@@ -49,7 +49,7 @@ pub struct CliBuilder {
     #[arg(short = 'p', long)]
     pub positional: Vec<String>,
     /// Add an optional positional argument
-    #[arg(short = 'o', long, conflicts_with_all = ["collect", "collect+"])]
+    #[arg(short = 'o', long, conflicts_with_all = ["collect", "collect_required"])]
     pub optional: Vec<String>,
     /// Add an optional argument
     #[arg(short = 'O', long)]
@@ -58,7 +58,7 @@ pub struct CliBuilder {
     #[arg(short = 'f', long)]
     pub flag: Vec<String>,
     /// Collect remaining positional arguments
-    #[arg(short = 'c', long, conflicts_with_all = ["optional", "collect+"])]
+    #[arg(short = 'c', long, conflicts_with_all = ["optional", "collect_required"])]
     pub collect: Option<String>,
     /// Collect (required) remaining positional arguments
     #[arg(short = 'C', long = "collect+")]
