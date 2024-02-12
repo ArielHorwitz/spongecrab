@@ -15,8 +15,8 @@ CLI=(
     -o "arg2;Optional positional argument;<default value>"
     -O "option;Optional argument;;o"
     -f "flag;Optional flag argument;;f"
-    -c "collect_any;Optional remaining positional arguments"
-    -C "collect_some;Required remaining positional arguments"
+    # -c "collect_any;Optional remaining positional arguments"
+    # -C "collect_some;Required remaining positional arguments"
     -e "extra;Optional extra arguments after '--'"
 )
 CLI=$(spongecrab --name "$APP_NAME" --about "$ABOUT" "${CLI[@]}" -- "$@") || exit 1
