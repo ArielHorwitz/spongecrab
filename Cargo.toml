@@ -4,6 +4,7 @@ description = "Bringing powerful argument parsing to bash scripts"
 version = "0.2.2"
 edition = "2021"
 repository = "https://github.com/ArielHorwitz/spongecrab"
+license = "Unlicense"
 keywords = [
     "argument",
     "arg",
