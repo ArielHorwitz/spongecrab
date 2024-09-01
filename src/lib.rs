@@ -131,7 +131,7 @@ impl CliBuilder {
     }
 
     fn output_values(&self, matches: &ArgMatches) -> String {
-        let prefix = self.prefix.to_owned().unwrap_or_else(|| "".to_owned());
+        let prefix = self.prefix.clone().unwrap_or_default();
         let mut output = Vec::new();
         let arguments = vec![&self.positional, &self.optional, &self.option]
             .into_iter()
@@ -190,10 +190,10 @@ fn with_arguments(cli: Command, args: &[String], arg_type: ArgumentType) -> Comm
 
 fn get_arg(data: &str, arg_type: ArgumentType) -> Arg {
     let (name, help, default, short) = get_arg_data(data);
-    let mut arg = Arg::new(name.to_owned()).help(help.to_owned());
+    let mut arg = Arg::new(name.clone()).help(help.clone());
     if [ArgumentType::Optional, ArgumentType::Option].contains(&arg_type) {
         if let Some(default) = default {
-            arg = arg.default_value(default.to_owned());
+            arg = arg.default_value(default.clone());
         };
     };
     if [ArgumentType::Option, ArgumentType::Flag].contains(&arg_type) {
@@ -204,8 +204,8 @@ fn get_arg(data: &str, arg_type: ArgumentType) -> Arg {
     arg = match arg_type {
         ArgumentType::Positional => arg.required(true),
         ArgumentType::Optional => arg,
-        ArgumentType::Option => arg.long(name.to_owned()),
-        ArgumentType::Flag => arg.long(name.to_owned()).action(ArgAction::SetTrue),
+        ArgumentType::Option => arg.long(name.clone()),
+        ArgumentType::Flag => arg.long(name.clone()).action(ArgAction::SetTrue),
         ArgumentType::Collect => arg.num_args(0..),
         ArgumentType::CollectRequired => arg.num_args(1..).required(true),
         ArgumentType::Last => arg.num_args(0..).last(true),
