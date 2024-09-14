@@ -3,7 +3,7 @@
 set -e
 
 # Command line interface (based on `spongecrab --generate`)
-APP_NAME=$(basename "$0")
+APP_NAME=$(basename "${0%.*}")
 ABOUT="$APP_NAME is a hello world program.
 
 Examples:

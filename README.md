@@ -28,7 +28,7 @@ Generated code (using `--generate`):
 ```bash
 
 # Command line interface (based on `spongecrab --generate`)
-APP_NAME=$(basename "$0")
+APP_NAME=$(basename "${0%.*}")
 ABOUT="program description"
 # Argument syntax: "<arg_name>;<help_text>;<default_value>;<short_name>"
 # -o, -c, -C are mutually exclusive

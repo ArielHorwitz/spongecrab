@@ -6,7 +6,7 @@ Spongecrab - bringing powerful argument parsing to bash scripts
 See \u{1b}[1m'--example'\u{1b}[0m and \u{1b}[1m'--generate'\u{1b}[0m for reference.";
 const GENERATED_BOILERPLATE: &str = r#"
 # Command line interface (based on `spongecrab --generate`)
-APP_NAME=$(basename "$0")
+APP_NAME=$(basename "${0%.*}")
 ABOUT="program description"
 # Argument syntax: "<arg_name>;<help_text>;<default_value>;<short_name>"
 # -o, -c, -C are mutually exclusive
