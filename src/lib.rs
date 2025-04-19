@@ -114,7 +114,7 @@ impl CliBuilder {
         let mut cli = Command::new(self.name.clone()).no_binary_name(true);
         if let Some(about) = self.about.clone() {
             cli = cli.about(about);
-        };
+        }
         cli = with_arguments(cli, &self.positional, ArgumentType::Positional);
         cli = with_arguments(cli, &self.optional, ArgumentType::Optional);
         cli = with_arguments(cli, &self.option, ArgumentType::Option);
@@ -123,10 +123,10 @@ impl CliBuilder {
             cli = cli.arg(get_arg(collect_var, ArgumentType::Collect));
         } else if let Some(collect_var) = &self.collect_required {
             cli = cli.arg(get_arg(collect_var, ArgumentType::CollectRequired));
-        };
+        }
         if let Some(extra_args) = &self.extra {
             cli = cli.arg(get_arg(extra_args, ArgumentType::Last));
-        };
+        }
         cli
     }
 
@@ -196,13 +196,13 @@ fn get_arg(data: &str, arg_type: ArgumentType) -> Arg {
     if [ArgumentType::Optional, ArgumentType::Option].contains(&arg_type) {
         if let Some(default) = default {
             arg = arg.default_value(default);
-        };
-    };
+        }
+    }
     if [ArgumentType::Option, ArgumentType::Flag].contains(&arg_type) {
         if let Some(short) = short {
             arg = arg.short(short);
-        };
-    };
+        }
+    }
     arg = match arg_type {
         ArgumentType::Positional => arg.required(true),
         ArgumentType::Optional => arg,
