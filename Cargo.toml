@@ -15,3 +15,6 @@ keywords = [
 [dependencies]
 anyhow = "1.0.98"
 clap = { version = "4.5.37", features = ["derive", "string"] }
+
+[dev-dependencies]
+tempfile = "3.19.1"

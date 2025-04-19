@@ -1,6 +1,7 @@
 #[cfg(test)]
 mod integration_tests {
     use spongecrab::CliBuilder;
+    use tempfile::NamedTempFile;
 
     #[test]
     fn parse() {
@@ -61,9 +62,10 @@ mod integration_tests {
         let checks = check_args_code(&args);
         let args = [args[0].1, args[1].1, "-o", args[2].1, "-f"];
         let script = format!("set -e\n{generated}\n{checks}");
-        std::fs::write("/tmp/test_generate.sh", script).expect("write");
+        let temp_file = NamedTempFile::new().unwrap();
+        std::fs::write(temp_file.path(), script).expect("write");
         let output = std::process::Command::new("bash")
-            .arg("/tmp/test_generate.sh")
+            .arg(temp_file.path())
             .args(args)
             .output()
             .expect("generated test script success");
@@ -86,9 +88,10 @@ mod integration_tests {
         let checks = check_args_code(&args);
         let args = [args[0].1, args[1].1, "-n", args[2].1, "-p"];
         let script = format!("set -e\n{generated}\n{checks}");
-        std::fs::write("/tmp/test_example.sh", script).expect("write");
+        let temp_file = NamedTempFile::new().unwrap();
+        std::fs::write(temp_file.path(), script).expect("write");
         let output = std::process::Command::new("bash")
-            .arg("/tmp/test_example.sh")
+            .arg(temp_file.path())
             .args(args)
             .output()
             .expect("generated test script success");
