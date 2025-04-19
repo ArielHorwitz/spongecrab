@@ -2,7 +2,7 @@
 name = "spongecrab"
 description = "Bringing powerful argument parsing to bash scripts"
 version = "0.2.3"
-edition = "2021"
+edition = "2024"
 repository = "https://github.com/ArielHorwitz/spongecrab"
 license = "Unlicense"
 keywords = [
@@ -13,5 +13,5 @@ keywords = [
 ]
 
 [dependencies]
-anyhow = "1.0.79"
-clap = { version = "4.4.14", features = ["derive", "string"] }
+anyhow = "1.0.98"
+clap = { version = "4.5.37", features = ["derive", "string"] }
