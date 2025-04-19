@@ -13,6 +13,40 @@ mod integration_tests {
     }
 
     #[test]
+    fn dash_to_underscore() {
+        #[rustfmt::skip]
+        let raw_args = [
+            "app",
+            "-p", "pos-arg",
+            "-o", "opt1-arg",
+            "-O", "opt2-arg",
+            "-f", "flag-arg",
+            "-e", "extra-args",
+            "--",
+            "valpos",
+            "valopt1",
+            "--opt2-arg", "valopt2",
+            "--flag-arg",
+            "--",
+            "valextra",
+        ];
+        let output = CliBuilder::new(&raw_args).parse().expect("parse");
+        assert!(output.contains("pos_arg='valpos'"));
+        assert!(output.contains("opt1_arg='valopt1'"));
+        assert!(output.contains("opt2_arg='valopt2'"));
+        assert!(output.contains("flag_arg='1'"));
+        assert!(output.contains("extra_args=('valextra')"));
+        // --collect
+        let raw_args = ["app", "-c", "pos-args", "--", "valpos"];
+        let output = CliBuilder::new(&raw_args).parse().expect("parse");
+        assert!(output.contains("pos_args=('valpos')"));
+        // --collect-required
+        let raw_args = ["app", "-C", "pos-args", "--", "valpos"];
+        let output = CliBuilder::new(&raw_args).parse().expect("parse");
+        assert!(output.contains("pos_args=('valpos')"));
+    }
+
+    #[test]
     fn generate() {
         let generated = CliBuilder::new(&["app", "--generate"])
             .parse()

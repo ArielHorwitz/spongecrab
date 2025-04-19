@@ -157,7 +157,8 @@ impl CliBuilder {
                     .collect::<Vec<String>>()
                     .join(" ")
             });
-            output.push(format!("{prefix}{name}=({collected})"));
+            let name = format!("{prefix}{name}").replace('-', "_");
+            output.push(format!("{name}=({collected})"));
         }
         if let Some(extra) = self.extra.as_ref() {
             let (name, _, _, _) = get_arg_data(extra);
@@ -167,7 +168,8 @@ impl CliBuilder {
                     .collect::<Vec<String>>()
                     .join(" ")
             });
-            output.push(format!("{prefix}{name}=({extras})"));
+            let name = format!("{prefix}{name}").replace('-', "_");
+            output.push(format!("{name}=({extras})"));
         }
         output.join("\n")
     }
